@@ -19,7 +19,8 @@ var GameSettings = Java.type("net.minecraft.client.settings.GameSettings");
 var S12PacketEntityVelocity = Java.type("net.minecraft.network.play.server.S12PacketEntityVelocity");
 var C03PacketPlayer = Java.type("net.minecraft.network.play.client.C03PacketPlayer")
 var C04PacketPlayerPosition = Java.type("net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition")
-
+var inCombat = false
+var combatticks;
 script.registerModule({
     name: "NerblesSpeeds",
     description: "Speeds Made by Nerbles",
@@ -28,74 +29,69 @@ script.registerModule({
         jumpMode: Setting.list({
             name: "Mode",
             default: "MatrixHop",
-            values: ["MatrixHop", "MatrixTimer", "MatrixWeird", "Vulcan", "Ncp", "Verus"]
+            values: ["MatrixHop", "MatrixWeird", "Vulcan", "Ncp", "Verus", "Dev"]
         }),
+        // Removed the MatrixTimer mode as it is just a waste of space at the moment
         timerBoostValue: Setting.boolean({
             name: "TimerBoost",
             default: true
         }),
+        matrixStrafeValue: Setting.boolean({
+            name: "MatrixHop-CombatStrafe",
+            default: true
+        }),
+        matrixStrafeMode: Setting.list({
+            name: "MatrixHop-StrafeMode",
+            default: "Full",
+            values: ["Semi", "Full"]
+        })
     }
 }, function (module) {
     module.on("enable", function() {
         jumped = false
+        inCombat = false
         ticks = 0
-        Chat.print(mc.thePlayer.jumpMovementFactor())
+        
     })
     module.on("update", function(){
+        if (mc.thePlayer.ticksExisted > combatticks) {
+            inCombat = false
+        }
         switch(module.settings.jumpMode.get()) {
             case "MatrixHop":
                 module.tag = "MatrixHop";
-                // mc.thePlayer.jumpMovementFactor = 0.02605
                 if (MovementUtils.isMoving()) {
                     if (mc.thePlayer.onGround) {
                         mc.gameSettings.keyBindJump.pressed = false
-                        mc.timer.timerSpeed = 2.0
                         mc.thePlayer.jump();
                         jumped = true
-                        MovementUtils.strafe(MovementUtils.getSpeed())
+                        mc.timer.timerSpeed = 0.95
+                        // if (!inCombat) MovementUtils.strafe(MovementUtils.getSpeed())
+                    } else {
+                    if (module.settings.matrixStrafeValue.get() && inCombat == true) {
+                        if (module.settings.matrixStrafeMode.get() == "Full") MovementUtils.strafe(0.21)
                     }
+                }
                 } else {
                     mc.timer.timerSpeed = 1.0
                     mc.thePlayer.motionX = 0.0
                     mc.thePlayer.motionZ = 0.0
                 }
                 if (mc.thePlayer.fallDistance > 0 < 1) {
-                    if (module.settings.timerBoostValue.get() == true) {
-                        mc.timer.timerSpeed += 0.117
+                    if (module.settings.matrixStrafeValue.get() && inCombat == true) {
+                        if (module.settings.matrixStrafeMode.get() == "Semi") MovementUtils.strafe(0.22)
                     }
-                    mc.thePlayer.motionY -= 0.00345
+                    if (module.settings.timerBoostValue.get() == true) {
+                        mc.timer.timerSpeed += 0.1175
+                    }
+                    mc.thePlayer.motionY -= 0.00347
                 }
                 if (mc.thePlayer.fallDistance > 1.3) {
                     mc.timer.timerSpeed = 1.0
                 }
                 if (module.settings.timerBoostValue.get() == true && !mc.thePlayer.onGround && !mc.thePlayer.fallDistance >= 0 <= 1) {
-                    mc.timer.timerSpeed = 1.072
+                    mc.timer.timerSpeed = 1.073
                 } else {
-                    mc.timer.timerSpeed = 1.0
-                }
-                break;
-            case "MatrixTimer":
-                module.tag = "MatrixTimer";
-                if (MovementUtils.isMoving()) {
-                    if (mc.thePlayer.motionY > 0.2) {
-                        mc.thePlayer.motionY += -0.0025
-                    }
-                    if (mc.thePlayer.onGround) {
-                        mc.thePlayer.setSprinting(true)
-                        mc.timer.timerSpeed = 0.55
-                        mc.thePlayer.jump()
-                        MovementUtils.strafe(MovementUtils.getSpeed() + 0.003)
-                    }
-                } else {
-                    mc.timer.timerSpeed = 1.0
-                    mc.thePlayer.motionX = 0
-                    mc.thePlayer.motionZ = 0
-                }
-                if (mc.thePlayer.fallDistance > 0) {
-                    mc.timer.timerSpeed = 7.0
-                    mc.thePlayer.motionY -= 0.0034
-                }
-                if (mc.thePlayer.fallDistance > 1.2) {
                     mc.timer.timerSpeed = 1.0
                 }
                 break;
@@ -105,7 +101,7 @@ script.registerModule({
                     if (mc.thePlayer.onGround) {
                         mc.gameSettings.keyBindJump.pressed = false
                         mc.thePlayer.jump()
-                        mc.timer.timerSpeed = 0.1
+                        ticks = mc.thePlayer.ticksExisted
                         jumps += 1
                     }
                 } else {
@@ -113,16 +109,16 @@ script.registerModule({
                     mc.thePlayer.motionX = 0
                     mc.thePlayer.motionZ = 0
                 }
+                if (mc.thePlayer.ticksExisted < ticks + 2) {
+                    mc.thePlayer.motionY += -0.0033
+                    mc.timer.timerSpeed = 1.05
+                } else {
+                    mc.timer.timerSpeed = 1.0
+                }
                 if (mc.thePlayer.fallDistance > 0 < 1) {
                     mc.thePlayer.motionX *= 1.00154
-                    mc.thePlayer.motionY -= 0.0034
+                    mc.thePlayer.motionY -= 0.0001
                     mc.thePlayer.motionZ *= 1.00154
-                    mc.timer.timerSpeed = 0.45
-                    if (jumps % 5 == 0) mc.timer.timerSpeed = 0.42
-                }
-                if (mc.thePlayer.fallDistance == 0 && mc.thePlayer.onGround == false) {
-                    mc.timer.timerSpeed = 1.1
-                    if (jumps % 5 == 0) mc.timer.timerSpeed = 1.275
                 }
                 break;
             case "Vulcan":
@@ -136,6 +132,7 @@ script.registerModule({
                         ticks = 0
                         mc.timer.timerSpeed = 1.0
                     }
+                    
                     if (mc.thePlayer.fallDistance > 0) {
                         mc.thePlayer.motionY = -0.275
                         mc.timer.timerSpeed = 1.045
@@ -153,13 +150,13 @@ script.registerModule({
                     if (mc.thePlayer.onGround) {
                         mc.thePlayer.jump();
                         MovementUtils.strafe(0.48);
-                        mc.thePlayer.motionX *= 1.002
-                        mc.thePlayer.motionZ *= 1.002
+                        mc.thePlayer.motionX *= 1.0021
+                        mc.thePlayer.motionZ *= 1.0021
                         mc.timer.timerSpeed = 0.9
                     }
                     MovementUtils.strafe(MovementUtils.getSpeed() + 0.001);
                     if (mc.thePlayer.fallDistance > 0) {
-                        mc.timer.timerSpeed = 1.443
+                        mc.timer.timerSpeed = 1.475
                         if (mc.thePlayer.fallDistance > 1.2) {
                             mc.timer.timerSpeed = 1.0
                         }
@@ -185,14 +182,18 @@ script.registerModule({
                 mc.thePlayer.motionY = -0.41
                 mc.timer.timerSpeed = 1.25
                 break;
-            case "Ncp":
-                mc.thePlayer.motionY += -0.1
         }
+    })
+
+    module.on("attack", function (event) {
+        inCombat = true
+        combatticks = mc.thePlayer.ticksExisted    
     })
 
     module.on("disable", function() {
         mc.timer.timerSpeed = 1.0
         jumped = false
+        inCombat = false
         jumps = 0
         ticks = 0
         noVelocityY = 0
