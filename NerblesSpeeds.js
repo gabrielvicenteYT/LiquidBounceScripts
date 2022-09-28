@@ -82,9 +82,13 @@ script.registerModule({
                         if (module.settings.matrixStrafeMode.get() == "Semi") MovementUtils.strafe(0.22)
                     }
                     if (module.settings.timerBoostValue.get() == true) {
-                        mc.timer.timerSpeed += 0.1175
+                        mc.timer.timerSpeed += 0.12
                     }
                     mc.thePlayer.motionY -= 0.00347
+                    if (!inCombat) {
+                        mc.thePlayer.motionX *= 1.00152
+                        mc.thePlayer.motionZ *= 1.00152
+                    }
                 }
                 if (mc.thePlayer.fallDistance > 1.3) {
                     mc.timer.timerSpeed = 1.0
