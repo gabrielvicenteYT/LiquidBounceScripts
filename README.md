@@ -1,2 +1,2 @@
-# LiquidBounceScripts
-bad liquidbounce scripts made by me
+# Nerbles Scripts
+bad liquidbounce scripts made by nerbles123
