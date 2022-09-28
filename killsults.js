@@ -74,7 +74,6 @@ script.registerModule({
                     mc.thePlayer.sendChatMessage(target.getName() + insultsZH_CN[Math.floor(Math.random() * insults.length)])
                     target = null
                 }
-                br 
             }
             }
     })
