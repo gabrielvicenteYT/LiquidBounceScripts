@@ -1,7 +1,7 @@
 /// api_version=2
 var script = registerScript({
     name: "NerblesSpeeds",
-    version: "1.1",
+    version: "1.2",
     authors: ["Nerbles1"]
 });
 
@@ -14,6 +14,9 @@ var C03PacketPlayer = Java.type("net.minecraft.network.play.client.C03PacketPlay
 var C04PacketPlayerPosition = Java.type("net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition")
 var inCombat = false
 var combatticks;
+var hasSpeed;
+var doTimerBoost;
+var blocksmcTimerMode;
 // Chat.print("§b[§5NerblesSpeeds§b] §f" + message) for debug messages maybe
 script.registerModule({
     name: "NerblesSpeeds",
@@ -23,7 +26,7 @@ script.registerModule({
         jumpMode: Setting.list({
             name: "Mode",
             default: "MatrixHop",
-            values: ["MatrixHop", "Vulcan", "Ncp", "Verus", "KarhuLow", "BlocksMC", "Spartan", "Dev"]
+            values: ["MatrixHop", "Vulcan", "Ncp", "Verus", "KarhuLow", "BlocksMC", "Spartan", "NoRules", "Dev"]
         }),
         timerBoostValue: Setting.boolean({
             name: "TimerBoost",
@@ -32,6 +35,11 @@ script.registerModule({
         matrixStrafeValue: Setting.boolean({
             name: "MatrixHop-CombatStrafe",
             default: true
+        }),
+        bmcTimerMode: Setting.list({
+            name: "BlocksMCTimerMode",
+            default: "Normal",
+            values: ["Infinite", "Fast", "Weird"]
         }),
     }
 }, function (module) {
@@ -43,6 +51,9 @@ script.registerModule({
         if (mc.thePlayer.ticksExisted > combatticks) {
             inCombat = false
         }
+        hasSpeed = mc.thePlayer.isPotionActive(1)
+        doTimerBoost = module.settings.timerBoostValue.get()
+        blocksmcTimerMode = module.settings.bmcTimerMode.get()
         switch (module.settings.jumpMode.get()) {
             case "MatrixHop":
                 module.tag = "MatrixHop";
@@ -63,14 +74,14 @@ script.registerModule({
                     mc.thePlayer.motionZ = 0.0
                 }
                 if (mc.thePlayer.fallDistance > 0 < 1) {
-                    if (module.settings.timerBoostValue.get() == true) mc.timer.timerSpeed = 1.1
+                    if (doTimerBoost) mc.timer.timerSpeed = 1.1
                     mc.thePlayer.motionY -= 0.0034
                     // Chat.print("a")
                 }
                 if (mc.thePlayer.fallDistance > 1.3) {
                     mc.timer.timerSpeed = 1.0
                 }
-                if (module.settings.timerBoostValue.get() == true && !mc.thePlayer.onGround && !mc.thePlayer.fallDistance >= 0 <= 1) {
+                if (doTimerBoost && !mc.thePlayer.onGround && !mc.thePlayer.fallDistance >= 0 <= 1) {
                     mc.timer.timerSpeed = 1.0
                 } else {
                     mc.timer.timerSpeed = 1.0
@@ -148,18 +159,22 @@ script.registerModule({
             case "BlocksMC":
                 module.tag = "BlocksMC"
                 if (MovementUtils.isMoving()) {
-                    if (mc.thePlayer.isPotionActive(1)) {
+                    if (hasSpeed) {
                         if (mc.thePlayer.onGround) {
                             mc.gameSettings.keyBindJump.pressed = false
                             mc.thePlayer.jump()
                             MovementUtils.strafe(0.485)
                             mc.timer.timerSpeed = 1.0
+                            if (doTimerBoost && blocksmcTimerMode == "Weird") mc.timer.timerSpeed = 0.9
+
                         } else {
                             MovementUtils.strafe(MovementUtils.getSpeed() + 0.0107)
                             if (mc.thePlayer.fallDistance > 0) {
                                 mc.thePlayer.motionX *= 1.013
                                 mc.thePlayer.motionZ *= 1.013
-                                mc.timer.timerSpeed = 1.1
+                                if (doTimerBoost && blocksmcTimerMode == "Infinite") mc.timer.timerSpeed = 1.1
+                                if (doTimerBoost && blocksmcTimerMode == "Fast") mc.timer.timerSpeed = 1.23
+                                if (doTimerBoost && blocksmcTimerMode == "Weird") mc.timer.timerSpeed = 1.5
                             }
                         }
                     } else {
@@ -168,14 +183,17 @@ script.registerModule({
                             mc.thePlayer.jump()
                             MovementUtils.strafe(0.485)
                             mc.timer.timerSpeed = 1.0
+                            if (doTimerBoost && blocksmcTimerMode == "Weird") mc.timer.timerSpeed = 0.9
                         } else {
                             if (mc.thePlayer.fallDistance < 1.4) {
-                            MovementUtils.strafe(MovementUtils.getSpeed() + 0.00022)
+                            MovementUtils.strafe(MovementUtils.getSpeed() + 0.0002)
                             } else mc.timer.timerSpeed = 1.0
                             if (mc.thePlayer.fallDistance > 0) {
                                 mc.thePlayer.motionX *= 1.009
                                 mc.thePlayer.motionZ *= 1.009
-                                mc.timer.timerSpeed = 1.1
+                                if (doTimerBoost && blocksmcTimerMode == "Infinite") mc.timer.timerSpeed = 1.1
+                                if (doTimerBoost && blocksmcTimerMode == "Fast") mc.timer.timerSpeed = 1.23
+                                if (doTimerBoost && blocksmcTimerMode == "Weird") mc.timer.timerSpeed = 1.55
                             }
                         }
                     }
@@ -212,6 +230,28 @@ script.registerModule({
                     mc.timer.timerSpeed = 1.0
                     mc.thePlayer.motionX = 0
                     mc.thePlayer.motionZ = 0
+                }
+                break;
+            case "NoRules":
+                module.tag = "NoRules";
+                if (MovementUtils.isMoving()) {
+                    if (mc.thePlayer.fallDistance < 0.5) {
+                        if (!mc.gameSettings.keyBindJump.pressed) {
+                        MovementUtils.strafe(MovementUtils.getSpeed() + 0.022)
+                        if (module.settings.timerBoostValue.get()) mc.timer.timerSpeed = 1.1
+                    }
+                    } else {
+                        mc.timer.timerSpeed = 1.0
+                    }
+                    if (mc.thePlayer.onGround) {
+                        if (mc.gameSettings.keyBindJump.pressed == false) {
+                            mc.thePlayer.jump()
+                            MovementUtils.strafe(0.66)
+                            mc.timer.timerSpeed = 1.0
+                        }
+                    } else {
+                        if (mc.thePlayer.fallDistance < 0.6 && mc.gameSettings.keyBindJump.pressed == false) mc.thePlayer.motionY -= 0.06
+                    }
                 }
                 break;
             case "Dev":

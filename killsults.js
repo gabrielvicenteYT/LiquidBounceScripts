@@ -24,7 +24,7 @@ script.registerModule({
         insultLang: Setting.list({
             name: "Language",
             default: "English",
-            values: ["English", "Spanish", "Chinese, Taiwan", "Chinese, Hong Kong", "Chinese, China", " Português,Brasil]
+            values: ["English", "Spanish", "Chinese, Taiwan", "Chinese, Hong Kong", "Chinese, China", " Português, Brasil"]
         })
     }
 }, function(module) {
@@ -83,6 +83,6 @@ script.registerModule({
                     target = null
                 }
             }
-            }
-    })
-})
+            })
+})  
+        
