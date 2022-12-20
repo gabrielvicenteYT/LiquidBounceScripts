@@ -1,7 +1,7 @@
 ///api_version=2
 var script = registerScript({
-    name: "NerblesTests",
-    version: "1.0",
+    name: "BlocksMCLongJump",
+    version: "1.1",
     authors: ["Nerbles1"]
 });
 
@@ -49,18 +49,19 @@ script.registerModule({
                             if (debug) Chat.print("§b[§6§lBlocksMC Longjump§b] §fLongjumping")
                         } else {
                             mc.thePlayer.motionX = 0;
-                            mc.thePlayer.motionZ = 0
+                            mc.thePlayer.motionZ = 0;
                             module.setState(false);
                         }
                     } else {
                         if (mc.thePlayer.fallDistance < 1.122 && mc.thePlayer.motionY < 0.0809) {
-                            mc.thePlayer.motionY += 0.029;
+                            mc.thePlayer.motionY += 0.0366;
                             if (mc.thePlayer.isPotionActive(1)) {
-                                MovementUtils.strafe(MovementUtils.getSpeed() + 0.038)
+                                MovementUtils.strafe(MovementUtils.getSpeed() + 0.0342)
                             } else {
                                 MovementUtils.strafe(MovementUtils.getSpeed() + 0.0092)
                             }
                         } else {
+                            MovementUtils.strafe();
                             jumped = true;
                         }
                     }
