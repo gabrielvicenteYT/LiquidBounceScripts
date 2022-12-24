@@ -14,13 +14,9 @@ script.registerModule({
         if (!mc.thePlayer.onGround && mc.thePlayer.fallDistance > 0) {
             if (mc.thePlayer.ticksExisted % 2 == 0) {
                 mc.thePlayer.motionY = -0.155
-                mc.thePlayer.motionX *= 1.002
-                mc.thePlayer.motionZ *= 1.002
                 
             } else {
                 mc.thePlayer.motionY = -0.1
-                mc.thePlayer.motionX *= 1.002
-                mc.thePlayer.motionZ *= 1.002
             }
         }
     })
