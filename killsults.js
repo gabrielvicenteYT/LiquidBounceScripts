@@ -79,7 +79,7 @@ script.registerModule({
             case "Português, Brasil":
                 module.tag = "PT_BR";
                 if (target != null && target.isDead) {
-                    mc.thePlayer.sendChatMessage(target.getName() + insultsZH_CN[Math.floor(Math.random() * insults.length)])
+                    mc.thePlayer.sendChatMessage(target.getName() + insultsPT_BR[Math.floor(Math.random() * insults.length)])
                     target = null
                 }
             }
