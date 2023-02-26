@@ -1,13 +1,11 @@
 /// api_version=2
 var script = registerScript({
     name: "NerblesSpeeds",
-    version: "1.4",
+    version: "1.5",
     authors: ["Nerbles1"]
 });
 
 var ticks = 0;
-var newslot
-var oldSlot
 var LB = Java.type("net.ccbluex.liquidbounce.LiquidBounce");
 var MovementUtils = Java.type("net.ccbluex.liquidbounce.utils.MovementUtils");
 var GameSettings = Java.type("net.minecraft.client.settings.GameSettings");
@@ -35,7 +33,7 @@ script.registerModule({
         jumpMode: Setting.list({
             name: "Mode",
             default: "Ncp",
-            values: ["Ncp", "VulcanYPort", "Verus", "KarhuLow", "BlocksMC", "Spartan", "NoRules", "Negativity", "Dev"]
+            values: ["Ncp", "VulcanYPort", "VulcanFloat", "Verus", "KarhuLow", "BlocksMC", "Spartan", "NoRules", "Negativity", "Dev"]
         }),
         timerBoostValue: Setting.boolean({
             name: "TimerBoost",
@@ -79,14 +77,17 @@ script.registerModule({
                         MovementUtils.strafe(0.48)
                     }
                     if (mc.thePlayer.onGround) {
+                        if (doTimerBoost) mc.timer.timerSpeed = 0.5
                         ticks = 0
                         mc.gameSettings.keyBindJump.pressed = false
                         mc.thePlayer.jump();
                         start = mc.thePlayer.posY
                         if (hasSpeed) MovementUtils.strafe(0.62); else MovementUtils.strafe(0.48);
                     } else {
+                        if (doTimerBoost && ticks >= 1) mc.timer.timerSpeed = 1.15
                         if (ticks == 1) mc.thePlayer.setPosition(mc.thePlayer.posX, start, mc.thePlayer.posZ)
-                        if (ticks == 4) mc.thePlayer.motionY = -0.1732
+                        if (ticks == 4) mc.thePlayer.motionY = -0.15
+                        MovementUtils.strafe()
                     }
                 }
                 break;
@@ -265,15 +266,28 @@ script.registerModule({
                     mc.thePlayer.motionZ = 0.0
                 }
                 break;
-            case "Dev":
-                module.tag = "Dev"
-                try {
-                    
-                    
-                } catch (e) {
-                    Chat.print(e)
-                }
-                break;
+            case "VulcanFloat":
+                    module.tag = "VulcanFloat"
+                    if (MovementUtils.isMoving()) {
+                        // if the player is on the ground jump and setMotionY to 0
+                        if (mc.thePlayer.onGround) {
+                            mc.thePlayer.jump()
+                            mc.thePlayer.motionY = 0.2
+                            ticks = 0
+                            MovementUtils.strafe(0.48)
+                        } else {
+                            ticks++
+                            // if theres a block 1 blocks below the player setMotionY to 0
+                            if (mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() != Blocks.air) {
+                                if (ticks >= 1) mc.thePlayer.motionY = 0
+                            }
+                            if (hasSpeed) {
+                                MovementUtils.strafe(0.47)
+                            } else {
+                                MovementUtils.strafe(0.33)
+                            }
+                        }
+                    }
             }
 
     });

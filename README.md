@@ -9,3 +9,4 @@ HycraftAutoLogin - bypass for hycrafts **OLD** chat captcha
 VulcanGlide - Vulcan Glide bypass that is stupidly simple  
 SessionStats - tracks kills, wins, deaths  
 HycraftHelper - AutoGG and AutoSetSkin (only work on hycraft)  
+NerblesDisablers - Vulcan Strafe disabler, Verus C08 fly disabler, Verus Scaffold disabler, lb scaffoldFix  
