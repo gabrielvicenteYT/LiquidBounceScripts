@@ -90,7 +90,7 @@ script.registerModule({
                 var packetx = packet.x - mc.thePlayer.posX
                 var packety = packet.y - mc.thePlayer.posY
                 var packetz = packet.z - mc.thePlayer.posZ
-                var diff = sqrt(packetx * packetx + packety * packety + packetz * packetz)
+                var diff = Math.sqrt(packetx * packetx + packety * packety + packetz * packetz)
                 if (diff <= 8) {
                     event.cancelEvent()
                     PacketUtils.sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, packet.getYaw(), packet.getPitch(), false))
