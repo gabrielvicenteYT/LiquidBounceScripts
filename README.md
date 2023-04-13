@@ -10,3 +10,4 @@ VulcanGlide - Vulcan Glide bypass that is stupidly simple
 SessionStats - tracks kills, wins, deaths  
 HycraftHelper - AutoGG and AutoSetSkin (only work on hycraft)  
 NerblesDisablers - Vulcan Strafe disabler, Verus C08 fly disabler, Verus Scaffold disabler, lb scaffoldFix  
+LegitScaffold - automatically rotates, holds right click and crouches on the edge of a block for you
