@@ -23,7 +23,7 @@ script.registerModule({
         disablerMode: Setting.list({
             name: "Mode",
             default: "VulcanStrafe",
-            values: ["VulcanStrafe", "VerusC08", "VerusScaffold"]
+            values: ["VulcanStrafe", "VerusC08", "VerusScaffold", "MushMC"]
         }),
         scaffoldFixValue: Setting.boolean({
             name: "ScaffoldFix",
@@ -53,6 +53,8 @@ script.registerModule({
             case "VerusScaffold":
                 module.tag = "VerusScaffold"
                 break;
+            case "MushMC":
+                module.tag = "MushMC"
         }
     })
 
@@ -72,6 +74,28 @@ script.registerModule({
                 PacketUtils.sendPacketNoEvent(new C08PacketPlayerBlockPlacement(p.getPosition(), p.getPlacedBlockDirection(), null, p.getPlacedBlockOffsetX(), p.getPlacedBlockOffsetY(), p.getPlacedBlockOffsetZ()));
                 if (module.settings.debugMode.get()) Chat.print("sent new C08")
             }
-    }
+        }
+        if (module.settings.disablerMode.get() == "MushMC") {
+            if (packet instanceof C03PacketPlayer) {
+                if (mc.thePlayer.ticksExisted % 20 == 0) {
+                    packet.y -= 11.015625;
+                    packet.onGround = true;
+                    packet.isMoving = false;
+                }
+            }
+            if (packet instanceof C0FPacketConfirmTransaction) {
+                event.cancelEvent();
+            }
+            if (packet instanceof S08PacketPlayerPosLook) {
+                var packetx = packet.x - mc.thePlayer.posX
+                var packety = packet.y - mc.thePlayer.posY
+                var packetz = packet.z - mc.thePlayer.posZ
+                var diff = sqrt(packetx * packetx + packety * packety + packetz * packetz)
+                if (diff <= 8) {
+                    event.cancelEvent()
+                    PacketUtils.sendPacketNoEvent(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, packet.getYaw(), packet.getPitch(), false))
+                }
+            }
+        }
     })
 })
