@@ -36,25 +36,25 @@ script.registerModule({
     }
 }, function (module) {
     module.on("update", function() {
-        switch (module.settings.disablerMode.get()) {
+        cfg = module.settings;
+        module.tag = cfg.disablerMode.get();
+        switch (cfg.disablerMode.get()) {
             case "VulcanStrafe":
                 module.tag = "VulcanStrafe"
                 if (mc.thePlayer.ticksExisted % 4 == 0) PacketUtils.sendPacketNoEvent(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), EnumFacing.UP));
-                if (module.settings.debugMode.get()) Chat.print("sent C07")
+                if (cfg.debugMode.get()) Chat.print("sent C07")
                 break;
             case "VerusC08":
                 module.tag = "VerusC08"
                 if (mc.thePlayer.ticksExisted % 15 == 0) {
                     var C08 = new C08PacketPlayerBlockPlacement(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ), 1, new ItemStack(Blocks.stone.getItem(mc.theWorld, new BlockPos(0, 0, 0))), 0.5, 0.5, 0.5);
                     PacketUtils.sendPacketNoEvent(C08);
-                    if (module.settings.debugMode.get()) Chat.print("sent C08")
+                    if (cfg.debugMode.get()) Chat.print("sent C08")
                 }
                 break;
             case "VerusScaffold":
-                module.tag = "VerusScaffold"
                 break;
             case "MushMC":
-                module.tag = "MushMC"
         }
     })
 
