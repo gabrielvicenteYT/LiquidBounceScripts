@@ -36,46 +36,41 @@ script.registerModule({
     }
 }, function (module) {
     module.on("update", function() {
-        cfg = module.settings;
+        var cfg = module.settings;
         module.tag = cfg.disablerMode.get();
         switch (cfg.disablerMode.get()) {
             case "VulcanStrafe":
-                module.tag = "VulcanStrafe"
                 if (mc.thePlayer.ticksExisted % 4 == 0) PacketUtils.sendPacketNoEvent(new C07PacketPlayerDigging(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), EnumFacing.UP));
                 if (cfg.debugMode.get()) Chat.print("sent C07")
                 break;
             case "VerusC08":
-                module.tag = "VerusC08"
                 if (mc.thePlayer.ticksExisted % 15 == 0) {
                     var C08 = new C08PacketPlayerBlockPlacement(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ), 1, new ItemStack(Blocks.stone.getItem(mc.theWorld, new BlockPos(0, 0, 0))), 0.5, 0.5, 0.5);
                     PacketUtils.sendPacketNoEvent(C08);
                     if (cfg.debugMode.get()) Chat.print("sent C08")
                 }
-                break;
-            case "VerusScaffold":
-                break;
-            case "MushMC":
         }
     })
 
     module.on("packet", function(event) {
         var packet = event.getPacket();
-        if (packet instanceof C09PacketHeldItemChange && module.settings.scaffoldFixValue.get()) {
+        var cfg = module.settings;
+        if (packet instanceof C09PacketHeldItemChange && cfg.scaffoldFixValue.get()) {
             e.getPacket().getSlotId() == prevSlot ? e.cancelEvent() : (prevSlot = e.getPacket().getSlotId())
-            if (module.settings.debugMode.get()) Chat.print("C09 fixed")
+            if (cfg.debugMode.get()) Chat.print("C09 fixed")
         }
 
         if (packet instanceof C08PacketPlayerBlockPlacement) {
-            if (module.settings.disablerMode.get() == "VerusScaffold") {
+            if (cfg.disablerMode.get() == "VerusScaffold") {
                 var p = packet;
                 event.cancelEvent();
-                if (module.settings.debugMode.get()) Chat.print("modifying C08")
+                if (cfg.debugMode.get()) Chat.print("modifying C08")
                 // re send the packet but with null as the itemstack
                 PacketUtils.sendPacketNoEvent(new C08PacketPlayerBlockPlacement(p.getPosition(), p.getPlacedBlockDirection(), null, p.getPlacedBlockOffsetX(), p.getPlacedBlockOffsetY(), p.getPlacedBlockOffsetZ()));
-                if (module.settings.debugMode.get()) Chat.print("sent new C08")
+                if (cfg.debugMode.get()) Chat.print("sent new C08")
             }
         }
-        if (module.settings.disablerMode.get() == "MushMC") {
+        if (cfg.disablerMode.get() == "MushMC") {
             if (packet instanceof C03PacketPlayer) {
                 if (mc.thePlayer.ticksExisted % 20 == 0) {
                     packet.y -= 11.015625;
